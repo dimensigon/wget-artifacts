@@ -25,6 +25,8 @@ pip3 install -r $BASEDIR/LX-BIN/scripts/requirements.txt
 export PATH=$PATH:/home/lxs/.local/bin
 ansible --version
 
+set +u
+
 cd $BASEDIR
 source ./env.sh
 
