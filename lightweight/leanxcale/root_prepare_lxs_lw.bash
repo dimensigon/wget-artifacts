@@ -49,8 +49,8 @@ useradd -c 'Mostly R/O Account' roaccount
 mkdir /home/roaccount && chown roaccount:dba /home/roaccount
 usermod -G dba roaccount
 usermod --shell /bin/bash roaccount
-uuidgen |  tr -d "-" > readonly_password
-echo "roaccount:`cat readonly_password`" | chpasswd
+uuidgen |  tr -d "-" > /root/readonly_password
+echo "roaccount:`cat /root/readonly_password`" | chpasswd
 
 output "-- Creating SW Directories --"
 

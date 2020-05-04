@@ -57,7 +57,7 @@ while true
 	do
 		$BASEDIR/LX-BIN/bin/lxConsole 3 | grep query_engine_local_transaction_manager | grep -c started \
 		&& return 0 \
-		|| sleep 3
+		|| (echo "Waiting for the Software to start..." && sleep 3)
 	done
 }
 
@@ -65,8 +65,8 @@ wait_to_start
 
 output "-- Creating DB & DBA User --"
 
-uuidgen |  tr -d "-" > leanxcale_password
-PWD_LXS=`cat leanxcale_password`
+uuidgen |  tr -d "-" > /home/lxs/leanxcale_password
+PWD_LXS=`cat /home/lxs/leanxcale_password`
 DB_NAME=leanxcale
 DB_USER=lxdba
 ${BASEDIR}/LX-BIN/bin/lxClient << EOF 
