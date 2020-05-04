@@ -1,0 +1,23 @@
+# $BASEDIR/conf/inventory
+# LeanXcale lightweight
+###########################################
+[all:vars]
+BASEDIR="{{ lookup('env','BASEDIR') }}"
+INSTALLATION_BASEDIR="{{ lookup('env','BASEDIR') }}"
+BACKUPDIR=/backup
+USER="{{ lookup('env','USER') }}"
+
+#NUMA=no
+forcememqe=2
+forcenkvds=1
+forcenqes=1
+
+[meta]
+localhost ansible_connection=local
+
+[datastores]
+localhost ansible_connection=local
+
+[defaults]
+sizing mem=5G
+###########################################
