@@ -9,7 +9,7 @@ function output() { echo -e "`fdt`:\e[92m$@\e[0m"; }
 ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -q -N ""
 
 #ssh-agent bash
-ssh-add ~/.ssh/id_rsa
+#ssh-add ~/.ssh/id_rsa
 
 output "-- LeanXcale Software (LXS) Install --"
 
