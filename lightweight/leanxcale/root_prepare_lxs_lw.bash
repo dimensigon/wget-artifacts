@@ -16,7 +16,7 @@ output "-- Updating & Installing necessary packages --"
 apt-get update -y
 
 apt-get install -y curl python3-dev libffi-dev libssl-dev \
-libxml2-dev openssh-client locate vim tree rsync nux-tools \
+libxml2-dev openssh-client locate vim tree rsync nux-tools rlwrap \
 libxslt1-dev libjpeg8-dev zlib1g-dev python3-distutils wget gcc screen numactl
 
 output "-- Downloading OpenJDK 1.8 --"
