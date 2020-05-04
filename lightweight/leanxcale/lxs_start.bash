@@ -22,9 +22,8 @@ cd $BASEDIR && tar xvf /tmp/$SW_NAME
 sed -i "/PyYAML/d" $BASEDIR/LX-BIN/scripts/requirements.txt
 
 pip3 install -r $BASEDIR/LX-BIN/scripts/requirements.txt
-ansible --version
-
 export PATH=$PATH:/home/lxs/.local/bin
+ansible --version
 
 cd $BASEDIR
 source ./env.sh
