@@ -66,4 +66,4 @@ python3 get-pip.py
 #export PATH=$PATH:/usr/local/bin/pip3
 
 su - lxs -c "wget --no-check-certificate https://ca355c55-0ab0-4882-93fa-331bcc4d45bd.pub.cloud.scaleway.com:3000/danimoya/wget-artifacts/raw/master/lightweight/leanxcale/lxs_start.bash -O /home/lxs/lxs_start.bash"
-su - lxs -c "chmod +x /home/lxs/lxs_start.bash && ./home/lxs/lxs_start.bash"
+su - lxs -c "chmod +x /home/lxs/lxs_start.bash && bash /home/lxs/lxs_start.bash"
