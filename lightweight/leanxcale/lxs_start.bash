@@ -30,7 +30,11 @@ set +u
 cd $BASEDIR
 source ./env.sh
 
-echo "source ./env.sh" >> ~/.bash_profile
+echo "
+export PATH=$PATH:/home/lxs/.local/bin
+export BASEDIR=/lxs/v0_400
+source $BASEDIR/env.sh
+" >> ~/.bash_profile
 
 output "-- Getting inventory file from private repo --"
 
@@ -47,6 +51,17 @@ output "-- Starting the Database Software --"
 
 # lxConsole 3    	# Show components.
 # lxClient  			# SQL CLI.
+
+function wait_to_start(){
+while true
+	do
+		$BASEDIR/LX-BIN/bin/lxConsole 3 | grep query_engine_local_transaction_manager | grep -c started \
+		&& return 0 \
+		|| sleep 3
+	done
+}
+
+wait_to_start
 
 output "-- Creating DB & DBA User --"
 
