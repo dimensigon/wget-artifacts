@@ -63,17 +63,18 @@ while true
 
 wait_to_start
 
-output "-- Creating DB & DBA User --"
+output "-- Creating DB & DB User --"
 
-uuidgen |  tr -d "-" > /home/lxs/leanxcale_password
-PWD_LXS=`cat /home/lxs/leanxcale_password`
+echo -e "!tables\n!quit\n" > /home/lxs/helloworld.sql
+
+uuidgen |  tr -d "-" > leanxcale_password
+PWD_LXS=`cat leanxcale_password`
 DB_NAME=leanxcale
-DB_USER=lxdba
-${BASEDIR}/LX-BIN/bin/lxClient << EOF 
-  !connect jdbc:leanxcale://localhost:1529/${DB_NAME} ${DB_USER} ${PWD_LXS}
-  !tables
-  !quit
-EOF
+DB_USER=lxdb
+
+${BASEDIR}/LX-BIN/bin/lxClient -u "jdbc:leanxcale://localhost:1529/${DB_NAME}" \
+	-n ${DB_USER} -p ${PWD_LXS} -f /home/lxs/helloworld.sql
+#
 
 #lxClient<<EOF
 #!connect jdbc:leanxcale://localhost:1529/lxs1 lxadm $PWD_LXS
@@ -82,6 +83,6 @@ EOF
 # leanxcale_password >> EMAIL.
 # readonly_password >> EMAIL.
 
-# qe-driver-0.400-20200403.113453-83.jar
+# qe-driver-*.jar
 
 output "-- Finished! --"
