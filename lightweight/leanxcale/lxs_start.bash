@@ -72,8 +72,7 @@ PWD_LXS=`cat /home/lxs/leanxcale_password`
 DB_NAME=leanxcale
 DB_USER=lxdb
 
-${BASEDIR}/LX-BIN/bin/lxClient -u "jdbc:leanxcale://localhost:1529/${DB_NAME}" \
--n ${DB_USER} -p ${PWD_LXS} -f /home/lxs/helloworld.sql
+${BASEDIR}/LX-BIN/bin/lxClient -u "jdbc:leanxcale://localhost:1529/${DB_NAME}" -n ${DB_USER} -p ${PWD_LXS} -f /home/lxs/helloworld.sql
 
 #lxClient -u jdbc:leanxcale://localhost:1529/${DB_NAME} -n ${DB_USER} -p ${PWD_LXS}
 
