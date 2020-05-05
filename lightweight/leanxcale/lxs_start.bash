@@ -67,22 +67,19 @@ output "-- Creating DB & DB User --"
 
 echo -e "!tables\n!quit\n" > /home/lxs/helloworld.sql
 
-uuidgen |  tr -d "-" > leanxcale_password
-PWD_LXS=`cat leanxcale_password`
+uuidgen |  tr -d "-" > /home/lxs/leanxcale_password
+PWD_LXS=`cat /home/lxs/leanxcale_password`
 DB_NAME=leanxcale
 DB_USER=lxdb
 
 ${BASEDIR}/LX-BIN/bin/lxClient -u "jdbc:leanxcale://localhost:1529/${DB_NAME}" \
-	-n ${DB_USER} -p ${PWD_LXS} -f /home/lxs/helloworld.sql
-#
+-n ${DB_USER} -p ${PWD_LXS} -f /home/lxs/helloworld.sql
 
-#lxClient<<EOF
-#!connect jdbc:leanxcale://localhost:1529/lxs1 lxadm $PWD_LXS
-#EOF
+#lxClient -u jdbc:leanxcale://localhost:1529/${DB_NAME} -n ${DB_USER} -p ${PWD_LXS}
 
 # leanxcale_password >> EMAIL.
 # readonly_password >> EMAIL.
 
-# qe-driver-*.jar
+# ${BASEDIR}/LX-BIN/lib/qe-driver-*.jar
 
 output "-- Finished! --"
