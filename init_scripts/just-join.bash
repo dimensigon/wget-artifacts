@@ -21,7 +21,7 @@ su - dimensigon -c \"echo 'source ~/venv/bin/activate' >> .bash_profile\"
 
 su - dimensigon -c \"pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon\"
 
-su - dimensigon -c \"dimensigon join $SERVER $TOKEN\"
+su - dimensigon -c \"dimensigon join --port $PORT $SERVER $TOKEN\"
 
 " > cloud-init-with-token.bash
 
