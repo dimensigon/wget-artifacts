@@ -1,6 +1,9 @@
 #!/bin/bash
 # Dimensigon - Generate a Cloud-init to just join the dimension
 
+function fdt() { date +%Y%m%d%H%M:%S:%N; }
+function output() { echo -e "`fdt`:\e[92m$@\e[0m"; }
+
 TOKEN=`dimensigon token`
 SERVER=`grep server ~/.dshell | awk -F= '{print $2}'`
 #SERVER=`dshell env get SERVER`
