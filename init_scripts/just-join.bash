@@ -8,7 +8,7 @@ PORT=`grep port ~/.dshell | awk -F= '{print $2}'`
 #PORT=`dshell env get PORT`
 
 echo "
-#!/bin/bash
+#!/usr/bin/env bash
 # Dimensigon - Generate a Cloud-init including a token.
 
 useradd -s /bin/bash -m dimensigon
