@@ -9,6 +9,7 @@ PORT=`grep port ~/.dshell | awk -F= '{print $2}'`
 
 echo "
 #!/bin/bash
+# Dimensigon - Generate a Cloud-init including a token.
 
 useradd -s /bin/bash -m dimensigon
 
