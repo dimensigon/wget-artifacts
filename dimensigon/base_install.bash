@@ -16,7 +16,7 @@ output "-- Installing the necessary packages --"
 
 apt-get update -y
 
-apt-get install -y firewalld python3 python3-wheel python3-dev python3-venv python3-pip libffi-dev libssl-dev autoconf build-essential
+apt-get install -y firewalld python3 python3-wheel python3-dev python3-venv python3-pip libffi-dev libssl-dev autoconf build-essential wget curl
 
 output "-- Adding firewall rules --"
 
@@ -35,4 +35,5 @@ su - dimensigon -c "echo 'source ~/venv/bin/activate' >> .bash_profile"
 
 output "-- PIP Install Dimensigon --"
 
-su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
+su - dimensigon -c "pip install dimensigon"
+

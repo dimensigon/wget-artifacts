@@ -86,7 +86,7 @@ su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifa
 
 #Until 20200930
 wget -q --load-cookies /tmp/cookies.txt \
-"https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1fI_y3wzQo2ieo2yxqfLxqpgyswr7cskX' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1fI_y3wzQo2ieo2yxqfLxqpgyswr7cskX" \
+"https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1mRUj19dZmrqx6lW91QBZn1H7Jn4gglp4' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1mRUj19dZmrqx6lW91QBZn1H7Jn4gglp4" \
 -O ~/license_dummy.xml && rm -rf /tmp/cookies.txt
 
 su - tibero -c "cd /tibero && tar -xf /tmp/tibero6-*.tar.gz"
