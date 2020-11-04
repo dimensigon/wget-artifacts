@@ -1,5 +1,5 @@
 #!/bin/bash
-# Dimensigon - Install Dimensigon Only. Create or Join to be added externally.
+# Dimensigon - Install Dimensigon Only
 
 set -eu
 
@@ -11,7 +11,7 @@ output "-- Updating & Installing necessary packages --"
 
 useradd -s /bin/bash -m dimensigon
 
-echo "
+echo "Defaults:dimensigon !requiretty
 dimensigon    ALL=(ALL)    NOPASSWD:ALL
 " >> /etc/sudoers
 
@@ -30,7 +30,7 @@ firewall-cmd --list-all
 
 output "-- Python - Creating a Virtual Environment --"
 
-su - dimensigon -c "python3 -m venv -- prompt dimensigon venv"
+su - dimensigon -c "python3 -m venv --prompt dimensigon venv"
 
 output "-- Python - Autoload at login time --"
 
@@ -39,7 +39,8 @@ su - dimensigon -c "echo 'source ~/venv/bin/activate' >> .bash_profile"
 output "-- PIP Install Dimensigon --"
 
 su - dimensigon -c "pip install wheel"
-su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
+#su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
+su - dimensigon -c "pip install dimensigon"
 
 set +eu
 
