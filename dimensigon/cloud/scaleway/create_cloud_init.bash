@@ -6,7 +6,7 @@ TOKEN=`dimensigon token --applicant $1 --expire-time 300`
 
 TEMPFILE=`mktemp --suffix=_cloud_init`
 
-cat /home/dimensigon/wget-artifacts/dimensigon/cloud/scaleway/install_dimensigon_apt.bash > $TEMPFILE
+cat /home/dimensigon/wget-artifacts/dimensigon/cloud/scaleway/install_dimensigon.bash > $TEMPFILE
 
 echo "
 output 'Cloud-init: Joning to dimension'
@@ -17,7 +17,7 @@ rc=\$?
 if [[ \$rc -eq 0 ]]
 then
   output 'Cloud-init: Starting dimensigon'
-  service dmcore start
+  systemctl start dmcore
 else
   echo 'Unable to join to the dimension'
 fi

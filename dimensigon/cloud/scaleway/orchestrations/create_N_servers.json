@@ -1,0 +1,134 @@
+{
+  "name": "create_N_servers",
+  "description": "creates N servers into Scaleway",
+  "stop_on_error": true,
+  "undo_on_error": true,
+  "stop_undo_on_error": true,
+  "steps": [
+    {
+      "id": 1,
+      "name": "create scaleway instances",
+      "undo": false,
+      "undo_on_error": true,
+      "schema": {
+        "input": {
+          "num_servers": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "instance_type": {
+            "type": "string",
+            "description": "type of instance to deploy in Scaleway. DEV1-S, DEV1-M, DEV1-L, DEV1-XL, etc. ",
+            "default": "DEV1-S"
+          },
+          "image": {
+            "type": "string",
+            "description": "The image that runs on your instance. It can be an OS, an InstantApp or one of your custom images.",
+            "default": "Ubuntu_20_04_Focal_Fossa"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "prefix used for server name creation",
+            "default": "node"
+          },
+          "client_email": {
+            "type": "string",
+            "description": "email used for tag server creation"
+          }
+        },
+        "required": [
+          "num_servers"
+        ],
+        "output": [
+          "scw_ids",
+          "server_names"
+        ]
+      },
+      "expected_rc": 0,
+      "code": [
+        "TOKEN_CLOUD_INIT=`/home/dimensigon/wget-artifacts/dimensigon/cloud/scaleway/create_apt_cloud_init.bash {{env.orch_execution_id}}`",
+        "",
+        "for id in `seq -w 1 {{input.num_servers}}`",
+        "do",
+        "    echo \"name={{input.prefix}}$id\"",
+        "    SERVER=$(scw create --name={{input.prefix}}$id --commercial-type={{input.instance_type}} --ip-address=dynamic {{input.image}})",
+        "    echo \"scw_id=$SERVER\"",
+        "    scw _userdata $SERVER cloud-init=@$TOKEN_CLOUD_INIT",
+        "    set +e; scw _userdata $SERVER clientemail={{input.client_email}}; set -e",
+        "    cloud-init status",
+        "    scw start $SERVER",
+        "done",
+        "exit 0",
+        ""
+      ],
+      "action_type": "SHELL",
+      "post_process": [
+        "match = re.findall(\"^scw_id=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$\", cp.stdout, re.MULTILINE)",
+        "vc.set('scw_ids', match)",
+        "match = re.findall(\"^name=([\\w_]+\\d+)$\", cp.stdout, re.MULTILINE)",
+        "if match:",
+        "  vc.set('server_names', match)",
+        "else:",
+        "  raise ValueError('No server name found')"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "stop and delete scaleway instances",
+      "undo": true,
+      "stop_on_error": false,
+      "parent_step_ids": [
+        1
+      ],
+      "schema": {
+        "input": {
+          "scw_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "code": "scw2 instance server terminate {{ input.scw_ids | join(' ') }}",
+      "action_type": "SHELL"
+    },
+    {
+      "id": 3,
+      "name": "wait until servers are joined",
+      "action_template_id": "00000000-0000-0000-000a-000000000002",
+      "undo": false,
+      "parent_step_ids": [
+        1
+      ],
+      "schema": {
+        "mapping": {
+          "timeout": 900
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "wait until servers are reachable",
+      "action_template_id": "00000000-0000-0000-000a-000000000004",
+      "undo": false,
+      "parent_step_ids": [
+        3
+      ],
+      "schema": {
+        "mapping": {
+          "timeout": 900
+        }
+      }
+    },
+    {
+      "id": 5,
+      "name": "delete servers from dimension",
+      "action_template_id": "00000000-0000-0000-000a-000000000005",
+      "undo": true,
+      "parent_step_ids": [
+        3
+      ]
+    }
+  ]
+}
