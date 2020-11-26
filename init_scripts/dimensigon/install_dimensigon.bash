@@ -1,7 +1,7 @@
 #!/bin/bash
 # Dimensigon - Install Dimensigon Only
 
-set -eu
+#set -eu
 
 function dn() { return 0; } #Do Nothing.
 function fdt() { date +%Y%m%d%H%M:%S:%N; }
@@ -44,11 +44,12 @@ su - dimensigon -c "echo 'source ~/venv/bin/activate' >> .bash_profile"
 
 output "-- PIP Install Dimensigon --"
 
+su - dimensigon -c "pip install --upgrade pip"
 su - dimensigon -c "pip install wheel"
 #su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
 su - dimensigon -c "pip install dimensigon"
 
-set +eu
+#set +eu
 
 output "-- Installing Dimensigon service --"
 
@@ -92,5 +93,5 @@ systemctl enable dimensigon.service
 
 [ -f /bin/systemctl ] && install_service
 
-set -eu
+#set -eu
 

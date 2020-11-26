@@ -186,8 +186,8 @@ resources:
             output "-- PIP Install Dimensigon --"
             su - dimensigon -c "python -m pip install --upgrade pip" | tee -a $LOG
             su - dimensigon -c "pip install wheel" | tee -a $LOG
-{#            su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"#}
-            su - dimensigon -c "pip install dimensigon" | tee -a $LOG
+            su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
+{#            su - dimensigon -c "pip install dimensigon" | tee -a $LOG#}
             set +eu
             output "-- Installing Dimensigon service --"
             function install_service() {

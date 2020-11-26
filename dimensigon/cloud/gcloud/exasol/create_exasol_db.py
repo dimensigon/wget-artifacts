@@ -24,6 +24,9 @@ import jinja2
 from docopt import docopt
 from functools import partial
 
+GCLOUD = "gcloud"
+# DIMENSIGON = "/home/joan/dimensigon/venv3.6/bin/python /home/joan/dimensigon/dimensigon/__main__.py"
+DIMENSIGON = "dimensigon"
 print_ = partial(print, end='', flush=True)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,7 +35,7 @@ if __name__ == '__main__':
     argv = docopt(__doc__)
 
     # Generate TOKEN
-    cmd = "dimensigon token"
+    cmd = f"{DIMENSIGON} token"
     if argv['--applicant'] is not None:
         cmd += ' --applicant ' + argv['--applicant']
 
@@ -61,7 +64,7 @@ if __name__ == '__main__':
     yaml_file.flush()
 
     # Execute DEPLOYMENT
-    cmd = f"gcloud"
+    cmd = GCLOUD
     if argv['--project-id'] is not None:
         cmd += f" --project {argv['--project-id']}"
     cmd += f" deployment-manager deployments create {argv['DEPLOYMENT_NAME']} --config {yaml_file.name}"
