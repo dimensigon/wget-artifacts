@@ -7,13 +7,11 @@ function dn() { return 0; } #Do Nothing.
 function fdt() { date +%Y%m%d%H%M:%S:%N; }
 function output() { echo -e "`fdt`:\e[92m$@\e[0m"; }
 
-output "-- Updating & Installing necessary packages --"
-
-useradd -s /bin/bash -m dimensigon
-
-echo "Defaults:dimensigon !requiretty
-dimensigon    ALL=(ALL)    NOPASSWD:ALL
-" >> /etc/sudoers
+if [ $(command -v setenforce) ]; then
+  output "-- SELinux - Disabling SELinux permanently --"
+  sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+  setenforce 0
+fi
 
 output "-- Installing the necessary packages --"
 
@@ -27,12 +25,23 @@ else
     exit 1
 fi
 
-output "-- Adding firewall rules --"
+output "-- Enabling firewalld & Adding firewall rules --"
+
+systemctl enable firewalld
+systemctl start firewalld
 
 firewall-cmd --list-all
 firewall-cmd --permanent --add-port=5000/tcp
 firewall-cmd --reload
 firewall-cmd --list-all
+
+output "-- Creating dimensigon user --"
+
+useradd -s /bin/bash -m dimensigon
+
+echo "Defaults:dimensigon !requiretty
+dimensigon    ALL=(ALL)    NOPASSWD:ALL
+" >> /etc/sudoers
 
 output "-- Python - Creating a Virtual Environment --"
 
@@ -46,8 +55,8 @@ output "-- PIP Install Dimensigon --"
 
 su - dimensigon -c "pip install --upgrade pip"
 su - dimensigon -c "pip install wheel"
-#su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
-su - dimensigon -c "pip install dimensigon"
+su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
+#su - dimensigon -c "pip install dimensigon"
 
 #set +eu
 
@@ -70,7 +79,7 @@ echo "
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Location: /etc/systemd/system/dmcore.service
+# Location: /etc/systemd/system/dimensigon.service
 
 [Unit]
 Description=Dimensigon
@@ -81,7 +90,6 @@ Type=simple
 User=dimensigon
 Group=dimensigon
 ExecStart=/home/dimensigon/venv/bin/dimensigon
-ExecStop=kill -15 \`cat ~/.dimensigon/dimensigon.pid\`
 
 [Install]
 WantedBy=multi-user.target
@@ -90,6 +98,8 @@ WantedBy=multi-user.target
 systemctl enable dimensigon.service
 
 }
+
+
 
 [ -f /bin/systemctl ] && install_service
 

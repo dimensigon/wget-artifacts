@@ -1,0 +1,123 @@
+{
+  "name": "create_scw_server",
+  "description": "creates a Scaleway instance server",
+  "stop_on_error": true,
+  "undo_on_error": true,
+  "stop_undo_on_error": true,
+  "steps": [
+    {
+      "id": 1,
+      "name": "create scaleway instance",
+      "undo": false,
+      "undo_on_error": true,
+      "schema": {
+        "input": {
+          "instance_type": {
+            "type": "string",
+            "description": "type of instance to deploy in Scaleway. (GP1-XS | GP1-S | GP1-M | GP1-L | GP1-XL | DEV1-S | DEV1-M | DEV1-L | DEV1-XL | RENDER-S)",
+            "default": "DEV1-S"
+          },
+          "image": {
+            "type": "string",
+            "description": "The image that runs on your instance. It can be an OS, an InstantApp or one of your custom images.",
+            "default": "centos_8"
+          },
+          "name": {
+            "type": "string",
+            "description": "name of the server"
+          },
+          "client_email": {
+            "type": "string",
+            "description": "email used for tag server creation"
+          }
+        },
+        "required": [
+          "input.name",
+          "vault.wget_artifacts"
+        ],
+        "output": [
+          "scw_id"
+        ]
+      },
+      "expected_rc": 0,
+      "code": [
+        "CLOUD_INIT=`{{vault.wget_artifacts}}/init_scripts/dimensigon/create_cloud_init.bash {{env.orch_execution_id}}`",
+        "scw2 instance server create image={{input.image}} type={{input.instance_type}} name={{input.name}}{% if input.client_email %} tags.0={{input.client_email}}{% endif %} ip=dynamic cloud-init=\"\"\"$(cat $CLOUD_INIT)\"\"\"",
+        ""
+      ],
+      "action_type": "SHELL",
+      "post_process": [
+        "import re",
+        "if cp.success:",
+        "  match = re.search('^ID\\s+([\\d\\w]{8}-[\\d\\w]{4}-[\\d\\w]{4}-[\\d\\w]{4}-[\\d\\w]{12})$', cp.stdout, re.M | re.A )",
+        "  if match:",
+        "    vc.set('scw_id', match[1])",
+        "  else:",
+        "    raise ValueError('No scw_id found')"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "stop and delete scaleway instances",
+      "undo": true,
+      "stop_on_error": false,
+      "parent_step_ids": [
+        3
+      ],
+      "schema": {
+        "input": {
+          "scw_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "code": "scw2 instance server terminate {{ input.scw_id }}",
+      "action_type": "SHELL"
+    },
+    {
+      "id": 3,
+      "name": "wait until servers are joined",
+      "action_template_id": "00000000-0000-0000-000a-000000000002",
+      "undo": false,
+      "parent_step_ids": [
+        1
+      ],
+      "schema": {
+        "mapping": {
+          "server_names": {"from":  "name"}
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "wait until servers are reachable",
+      "action_template_id": "00000000-0000-0000-000a-000000000004",
+      "undo": false,
+      "parent_step_ids": [
+        3
+      ],
+      "schema": {
+        "mapping": {
+          "server_names": {"from":  "name"}
+        }
+      }
+    },
+    {
+      "id": 5,
+      "name": "delete servers from dimension",
+      "action_template_id": "00000000-0000-0000-000a-000000000005",
+      "undo": true,
+      "schema": {
+        "mapping": {
+          "server_names": {"from":  "name"}
+        }
+      },
+      "parent_step_ids": [
+        3
+      ]
+    }
+  ]
+}
