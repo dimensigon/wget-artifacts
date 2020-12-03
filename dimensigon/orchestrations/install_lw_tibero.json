@@ -142,6 +142,7 @@
           "1"
         ],
         "code": ["echo \"Deleting tibero and roaccount users and dba group\"",
+          "killall -9 -u tibero",
           "userdel -r tibero",
           "userdel -r roaccount",
           "groupdel dba",
