@@ -67,10 +67,7 @@
       "schema": {
         "input": {
           "scw_id": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "type": "string"
           }
         }
       },
