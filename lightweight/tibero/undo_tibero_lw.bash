@@ -1,4 +1,5 @@
 #!/bin/bash
+killall -9 -u tibero
 echo "Deleting tibero and roaccount and dba group"
 userdel -r tibero
 userdel -r roaccount

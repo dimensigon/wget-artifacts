@@ -18,12 +18,16 @@ output "-- Installing the necessary packages --"
 if [ $(command -v apt-get) ]; then
     apt-get update -y
     apt-get install -y firewalld python3 python3-dev python3-venv python3-pip libffi-dev libssl-dev autoconf build-essential
+    apt-get install -y xclip
 elif [ $(command -v yum) ]; then
     yum -y install python3 python3-devel sqlite-devel openssl-devel xz zlib zlib-devel pcre-devel gcc readline-devel libffi-devel firewalld
+    yum -y install xclip
 else
     output "No package handling utility found"
     exit 1
 fi
+
+
 
 output "-- Enabling firewalld & Adding firewall rules --"
 
