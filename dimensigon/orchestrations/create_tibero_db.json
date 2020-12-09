@@ -13,6 +13,7 @@
                     "hosts": {
                         "from": "env.server_id"
                     },
+                    "image":  "centos_7.6",
                     "instance_type": "DEV1-M"
 
                 }

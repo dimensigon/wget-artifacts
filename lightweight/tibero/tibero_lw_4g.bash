@@ -8,15 +8,14 @@ yum clean all
 yum repolist
 yum -y update
 
-#yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 ntp \
-#	gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
-#	compat-libstdc++ libaio libaio-devel ufw \
-#	perl make tree bc wget curl #Extra
-##
-
-yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
-  libaio libaio-devel libnsl \
+yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 ntp \
+	gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
+	compat-libstdc++ libaio libaio-devel ufw \
 	perl make tree bc wget curl #Extra
+
+#yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
+#  libaio libaio-devel libnsl \
+#	perl make tree bc wget curl #Extra
 
 yum -q clean packages
 
