@@ -27,18 +27,23 @@ echo "$1=$2" >> $TB_CONFIG/tibero.tip
 }
 
 # START Input parsing
-if [[ $1 -eq 4 ]]; then
-  TOTAL_SHM_SIZE="1800M"
-  MEMORY_TARGET="3000M"
-elif [[ $1 -eq 8 ]]; then
-  TOTAL_SHM_SIZE="5200M"
-  MEMORY_TARGET="6700M"
-elif [[ $1 -eq 12 ]]; then
-  TOTAL_SHM_SIZE="7000M"
-  MEMORY_TARGET="9200M"
-else
-  echo "Invalid memory size '$1'. Choose from 4, 8 or 12"
+if [[ $# -lt 1 ]] || [[ $# -gt 2 ]]; then
+  echo -e "usage: start_tibero.bash SIZE [SYS_PASSWORD]\n"
   exit 9
+else
+  if [[ $1 -eq 4 ]]; then
+    TOTAL_SHM_SIZE="1800M"
+    MEMORY_TARGET="3000M"
+  elif [[ $1 -eq 8 ]]; then
+    TOTAL_SHM_SIZE="5200M"
+    MEMORY_TARGET="6700M"
+  elif [[ $1 -eq 12 ]]; then
+    TOTAL_SHM_SIZE="7000M"
+    MEMORY_TARGET="9200M"
+  else
+    echo "Invalid memory size '$1'. Choose from 4, 8 or 12"
+    exit 9
+  fi
 fi
 
 if [ -z "$2" ]; then
