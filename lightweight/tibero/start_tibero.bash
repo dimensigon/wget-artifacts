@@ -46,12 +46,13 @@ else
   fi
 fi
 
-if [ -z "$2" ]; then
+if [[ $# -eq 2 ]]; then
+  SYS_PWD=$2
+else
   SYS_PWD=`uuidgen |  tr -d "-"`
   echo "$SYS_PWD" > sys_password
-else
-  SYS_PWD=$2
 fi
+
 
 output "--- Executing TB_CONFIG/gen_tip.sh ---"
 $TB_CONFIG/gen_tip.sh
