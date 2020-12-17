@@ -1,5 +1,10 @@
 #!/bin/bash
-# Lightweight version: DEV1-S size. 4G RAM.
+# Starts Tibero database
+# usage: start_tibero.bash SIZE [SYS_PASSWORD]
+#
+# Arguments:
+#   SIZE          size of Tibero memory database. Available: 4, 8 or 12.
+#   SYS_PASSWORD  Password that will be set for sys user DB. If not provided a random one will be generated
 
 set -eu
 
@@ -21,11 +26,33 @@ echo "$1=$2" >> $TB_CONFIG/tibero.tip
 
 }
 
+# START Input parsing
+if [[ $1 -eq 4 ]]; then
+  TOTAL_SHM_SIZE="1800M"
+  MEMORY_TARGET="3000M"
+elif [[ $1 -eq 8 ]]; then
+  TOTAL_SHM_SIZE="5200M"
+  MEMORY_TARGET="6700M"
+elif [[ $1 -eq 12 ]]; then
+  TOTAL_SHM_SIZE="7000M"
+  MEMORY_TARGET="9200M"
+else
+  echo "Invalid memory size '$1'. Choose from 4, 8 or 12"
+  exit 9
+fi
+
+if [ -z "$2" ]; then
+  SYS_PWD=`uuidgen |  tr -d "-"`
+  echo "$SYS_PWD" > sys_password
+else
+  SYS_PWD=$2
+fi
+
 output "--- Executing TB_CONFIG/gen_tip.sh ---"
 $TB_CONFIG/gen_tip.sh
 
-tibero_tip_set "TOTAL_SHM_SIZE" "1800M"
-tibero_tip_set "MEMORY_TARGET" "3000M"
+tibero_tip_set "TOTAL_SHM_SIZE" $TOTAL_SHM_SIZE
+tibero_tip_set "MEMORY_TARGET" $MEMORY_TARGET
 
 output "--- Creating the Database with TB_HOME/bin/tb_create_db.sh ---"
 $TB_HOME/bin/tb_create_db.sh
@@ -38,18 +65,11 @@ $TB_HOME/bin/tb_create_db.sh
 
 output "--- Securing Tibero SYS user ---"
 
-if [ -z $1 ]; then
-  uuidgen |  tr -d "-" > sys_password
-else
-  echo "$1" > sys_password
-fi
-
 sleep 5
-
-SYS_PWD=`cat sys_password`
 
 tbsql sys/tibero<<EOF
 ALTER USER SYS IDENTIFIED BY "$SYS_PWD";
 EOF
 
+echo "SYS:$SYS_PWD"
 output "--- Finished ---"

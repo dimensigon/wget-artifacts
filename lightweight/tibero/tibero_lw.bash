@@ -1,6 +1,11 @@
 #!/bin/bash
-# tibero_lw.bash
-# To boot a minimalistic (lightweight) Tibero with minimal resources for economic development.
+# Boot a minimalistic (lightweight) Tibero with minimal resources for economic development.
+#
+# usage: tibero_lw.bash SIZE [SYS_PASSWORD]
+#
+# Arguments:
+#   SIZE          size of Tibero memory database. Available: 4, 8 or 12.
+#   SYS_PASSWORD  Password that will be set for sys user DB. If not provided a random one will be generated
 
 set -eu
 
@@ -12,10 +17,6 @@ yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 ntp \
 	gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
 	compat-libstdc++ libaio libaio-devel ufw \
 	perl make tree bc wget curl #Extra
-
-#yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
-#  libaio libaio-devel libnsl \
-#	perl make tree bc wget curl #Extra
 
 yum -q clean packages
 
@@ -105,7 +106,7 @@ cp -p ~/license_dummy.xml /tibero/tibero6/license/license.xml
 
 /usr/local/bin/tctl check $TB_HOME
 
-su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/start_8g.bash -O /home/tibero/start_8g.bash"
+su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/tibero/start_tibero.bash -O /home/tibero/start_tibero.bash"
 
-su - tibero -c "chmod +x start_8g.bash && bash start_8g.bash"
+su - tibero -c "chmod +x start_tibero.bash && bash start_tibero.bash $1 $2"
 
