@@ -59,8 +59,8 @@ output "-- PIP Install Dimensigon --"
 
 su - dimensigon -c "pip install --upgrade pip"
 su - dimensigon -c "pip install wheel"
-su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
-#su - dimensigon -c "pip install dimensigon"
+#su - dimensigon -c "pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple dimensigon"
+su - dimensigon -c "pip install dimensigon"
 
 #set +eu
 

@@ -111,7 +111,7 @@
         "",
         "su - tibero -c \"wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/tibero/start_tibero.bash -O /home/tibero/start_tibero.bash\"",
         "",
-        "su - tibero -c \"chmod +x start_tibero.bash && bash start_tibero.bash {{input.tibero_mem_size}} {{input}}\"",
+        "su - tibero -c \"chmod +x start_tibero.bash && bash start_tibero.bash {{input.tibero_mem_size}}\"",
         "",
         "",
         ""
@@ -126,38 +126,48 @@
             "description": "memory size of tibero database",
             "default": 4
           }
-        }
+        },
+        "output": ["sys_password"]
       },
+      "post_process": [
+        "import re",
+        "if cp.success:",
+        "  m = re.search('^SYS:([\\w\\d]+)$', cp.stdout, re.M)",
+        "  if m:",
+        "    vc.set('sys_password', m.group(1))",
+        "  else:",
+        "    raise ValueError('No match found for sys_password')"
+      ],
       "expected_rc": 0,
       "system_kwargs": {
         "run_as": "root"
       }
     },
     {
-        "id": "2",
-        "undo": true,
-        "system_kwargs": {
-          "run_as": "root"
-        },
-        "parent_step_ids": [
-          "1"
-        ],
-        "code": ["echo \"Deleting tibero and roaccount users and dba group\"",
-          "killall -9 -u tibero",
-          "userdel -r tibero",
-          "userdel -r roaccount",
-          "groupdel dba",
-          "",
-          "rm -fr /tibero",
-          "",
-          "if [ -f /etc/sysctl.conf.before_tibero_install.bkp ]; then",
-          "\t  echo \"restoring sysctl.conf file\"",
-          "\t  cp /etc/sysctl.conf.before_tibero_install.bkp /etc/sysctl.conf",
-          "fi",
-          ""
-        ],
-        "action_type": "SHELL"
-      }
-
+      "id": "2",
+      "undo": true,
+      "system_kwargs": {
+        "run_as": "root"
+      },
+      "parent_step_ids": [
+        "1"
+      ],
+      "code": [
+        "echo \"Deleting tibero and roaccount users and dba group\"",
+        "killall -9 -u tibero",
+        "userdel -r tibero",
+        "userdel -r roaccount",
+        "groupdel dba",
+        "",
+        "rm -fr /tibero",
+        "",
+        "if [ -f /etc/sysctl.conf.before_tibero_install.bkp ]; then",
+        "\t  echo \"restoring sysctl.conf file\"",
+        "\t  cp /etc/sysctl.conf.before_tibero_install.bkp /etc/sysctl.conf",
+        "fi",
+        ""
+      ],
+      "action_type": "SHELL"
+    }
   ]
 }

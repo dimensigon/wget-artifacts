@@ -2,8 +2,8 @@
 
 #set -eu
 
-DIMENSIGON="/home/joan/dimensigon/venv3.6/bin/python /home/joan/dimensigon/dimensigon/__main__.py"
-#DIMENSIGON=dimensigon
+#DIMENSIGON="/home/joan/dimensigon/venv3.6/bin/python /home/joan/dimensigon/dimensigon/__main__.py"
+DIMENSIGON=dimensigon
 TOKEN=`$DIMENSIGON token --applicant $1 --expire-time 300`
 
 TEMPFILE=`mktemp --suffix=_cloud_init`
