@@ -14,7 +14,7 @@
             "from": "env.server_id"
           },
           "image": "centos_7.6",
-          "instance_type": "DEV1-M"
+          "instance_type": "DEV1-S"
         }
       },
       "system_kwargs": {},
@@ -42,7 +42,11 @@
       "id": 3,
       "undo": false,
       "action_type": "SHELL",
-      "code": "python /home/joan/PyCharmProjects/Dimensigon_WooCommerce_backend/send_email_googleapi.py --subject=\"Dimensigon Tibero Server\" --email-template=/home/joan/PyCharmProjects/Dimensigon_WooCommerce_backend/template/tibero_template.html --image-directory=/home/joan/PyCharmProjects/Dimensigon_WooCommerce_backend/template/images --param=name:\"{{input.client_email}}\" --param=db_user:sys --param=db_password:{{input.sys_password}} --param=db_server:{{input.scw_id}}.pub.instances.scw.cloud --param=db_port:8629 --param=db_name:tibero /home/joan/PyCharmProjects/Dimensigon_WooCommerce_backend/credentials.json /home/joan/PyCharmProjects/Dimensigon_WooCommerce_backend/token.pickle {{input.client_email}}",
+      "code": [
+        "PLUGIN_PATH={{vault.plugins}}/google_email",
+        "TEMPLATE_PATH={{vault.email_templates}}/tibero_saas_demo",
+        "python $PLUGIN_PATH/main.py --subject=\"Dimensigon Tibero Server\" --email-template=$TEMPLATE_PATH/template.html --image-directory=$TEMPLATE_PATH/images --param=name:\"{{input.client_email}}\" --param=db_user:sys --param=db_password:{{input.sys_password}} --param=db_server:{{input.scw_id}}.pub.instances.scw.cloud --param=db_port:8629 --param=db_name:tibero $PLUGIN_PATH/credentials/bot@knowtrade.eu_credentials.json $PLUGIN_PATH/credentials/bot@knowtrade.eu_token.pickle {{input.client_email}}"
+      ],
       "expected_rc": 0,
       "parent_step_ids": [
         "2"
@@ -59,7 +63,13 @@
             "type": "string"
           }
         },
-        "required": ["client_email", "sys_password", "scw_id"]
+        "required": [
+          "client_email",
+          "sys_password",
+          "scw_id",
+          "vault.plugins",
+          "vault.email_templates"
+        ]
       }
     }
   ]
