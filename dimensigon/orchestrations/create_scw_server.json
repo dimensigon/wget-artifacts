@@ -36,7 +36,6 @@
           }
         },
         "required": [
-          "input.name",
           "vault.wget_artifacts"
         ],
         "output": [
@@ -45,8 +44,9 @@
       },
       "expected_rc": 0,
       "code": [
+        "export DM_JOIN_SERVER={{vault.join_server}}",
         "CLOUD_INIT=`{{vault.wget_artifacts}}/init_scripts/dimensigon/create_cloud_init.bash {{env.orch_execution_id}}`",
-        "scw2 instance server create{% if input.project_id %} project-id={{input.project-id}}{% endif %} image={{input.image}} type={{input.instance_type}} name={{input.name}}{% if input.client_email %} tags.0={{input.client_email}}{% endif %} ip=dynamic cloud-init=\"\"\"$(cat $CLOUD_INIT)\"\"\"",
+        "scw2 instance server create{% if input.project_id %} project-id={{input.project-id}}{% endif %} image={{input.image}} type={{input.instance_type}}{% if input.name %} name={{input.name}}{% endif %}{% if input.client_email %} tags.0={{input.client_email}}{% endif %} ip=dynamic cloud-init=\"\"\"$(cat $CLOUD_INIT)\"\"\"",
         ""
       ],
       "action_type": "SHELL",

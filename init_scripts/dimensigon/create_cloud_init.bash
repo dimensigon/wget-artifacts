@@ -2,16 +2,19 @@
 
 #set -eu
 
-#DIMENSIGON="/home/joan/dimensigon/venv3.6/bin/python /home/joan/dimensigon/dimensigon/__main__.py"
+#############################
+# INIT variables definition #
+#---------------------------#
 DIMENSIGON=dimensigon
-SERVER=sqlaas0.dimensigon.com
+SERVER=$DM_JOIN_NODE
 TOKEN=`$DIMENSIGON token --applicant $1 --expire-time 300`
-
-TEMPFILE=`mktemp --suffix=_cloud_init`
-
+TEMP_FILE=`mktemp --suffix=_cloud_init`
 BASEDIR=$(dirname "$0")
+############################
+# END variables definition #
+#--------------------------#
 
-cat "$BASEDIR/install_dimensigon.bash" > $TEMPFILE
+cat "$BASEDIR/install_dimensigon.bash" > $TEMP_FILE
 
 echo "
 output 'Cloud-init: Joning to dimension'
@@ -26,6 +29,6 @@ then
 else
   echo 'Unable to join to the dimension'
 fi
-" >> $TEMPFILE
+" >> $TEMP_FILE
 
-echo "$TEMPFILE"
+echo "$TEMP_FILE"
