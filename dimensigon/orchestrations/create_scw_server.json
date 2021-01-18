@@ -36,7 +36,8 @@
           }
         },
         "required": [
-          "vault.wget_artifacts"
+          "vault.wget_artifacts",
+          "vault.join_server"
         ],
         "output": [
           "scw_id"

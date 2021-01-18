@@ -17,6 +17,11 @@
           "instance_type": "DEV1-S"
         }
       },
+      "pre_process": [
+        "import re",
+        "if vc.get('name'):",
+        "  vc.set('name', re.sub('[^\\.0-9a-zA-Z]+', '-', vc.get('name')))"
+      ],
       "system_kwargs": {},
       "parent_step_ids": [],
       "action_type": "ORCHESTRATION"
