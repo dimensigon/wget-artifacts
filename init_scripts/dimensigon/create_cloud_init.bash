@@ -6,7 +6,7 @@
 # INIT variables definition #
 #---------------------------#
 DIMENSIGON=dimensigon
-SERVER=$DM_JOIN_NODE
+SERVER=$DM_JOIN_SERVER
 TOKEN=`$DIMENSIGON token --applicant $1 --expire-time 300`
 TEMP_FILE=`mktemp --suffix=_cloud_init`
 BASEDIR=$(dirname "$0")
