@@ -47,6 +47,9 @@ echo "Defaults:dimensigon !requiretty
 dimensigon    ALL=(ALL)    NOPASSWD:ALL
 " >> /etc/sudoers
 
+su - dimensigon -c 'echo "PATH=/home/dimensigon/venv/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/dimensigon/bin"' >> /home/dimensigon/environ.conf
+su - dimensigon -c 'echo "HOME=/home/dimensigon"' >> /home/dimensigon/environ.conf
+
 output "-- Python - Creating a Virtual Environment --"
 
 su - dimensigon -c "python3 -m venv --prompt dimensigon venv"
@@ -93,7 +96,11 @@ After=network.target
 Type=simple
 User=dimensigon
 Group=dimensigon
+Environment=\"PATH=/home/dimensigon/venv/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/dimensigon/bin\"
+Environment=\"HOME=/home/dimensigon\"
 ExecStart=/home/dimensigon/venv/bin/dimensigon
+ExecStop=kill -15 `cat ~/.dimensigon/dimensigon.pid`
+
 
 [Install]
 WantedBy=multi-user.target
