@@ -58,7 +58,13 @@
         "  if match:",
         "    vc.set('scw_id', match[1])",
         "  else:",
-        "    raise ValueError('No scw_id found')"
+        "    raise ValueError('No scw_id found')",
+        "  if not vc.get('name'):",
+        "    match = re.search('^Name\\\\s+([\\\\w-]+)$', cp.stdout, re.M | re.A )",
+        "    if match:",
+        "      vc.set('name', match[1])",
+        "    else:",
+        "      raise ValueError('No name found')"
       ]
     },
     {
