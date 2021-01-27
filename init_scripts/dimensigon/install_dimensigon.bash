@@ -35,7 +35,7 @@ systemctl enable firewalld
 systemctl start firewalld
 
 firewall-cmd --list-all
-firewall-cmd --permanent --add-port=5000/tcp
+firewall-cmd --permanent --add-port=20194/tcp
 firewall-cmd --reload
 firewall-cmd --list-all
 
