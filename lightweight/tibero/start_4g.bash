@@ -38,7 +38,11 @@ $TB_HOME/bin/tb_create_db.sh
 
 output "--- Securing Tibero SYS user ---"
 
-uuidgen |  tr -d "-" > sys_password
+if [ -z $1 ]; then
+  uuidgen |  tr -d "-" > sys_password
+else
+  echo "$1" > sys_password
+fi
 
 sleep 5
 

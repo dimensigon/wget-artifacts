@@ -1,0 +1,29 @@
+imports:
+    -
+        path: exasol_cluster_google.jinja
+resources:
+    -
+        name: exasol-cluster
+        type: exasol_cluster_google.jinja
+        properties:
+            publicIP: true
+            dbNodeCount: 2
+            standbyNode: 0
+            dbSystemName: exasol
+            exasolPassword: exasol
+            dbPassword: exasol
+            license: ""
+            firewallRule: 0.0.0.0/0
+            networkName: default
+            subnetworkName: default
+            subnetworkCidr: 192.168.0.0/24
+            firstNodeIP: 192.168.0.11
+            zone: europe-west1-b
+            timezone: Europe/Berlin
+            image: 'https://www.googleapis.com/compute/v1/projects/public-marketplace/global/images/exasol-6-2-3-payg'
+            machineTypeManagementNode: n1-standard-2
+            machineTypeDatabaseNode: n1-highmem-2
+            dnsServer: 169.254.169.254
+            ntpServer: ntp.ubuntu.com
+            blockDeviceVolumeSizeGB: 140
+            blockDeviceCount: 1

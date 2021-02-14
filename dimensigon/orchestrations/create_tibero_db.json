@@ -1,0 +1,43 @@
+{
+    "name": "create_tibero_db",
+    "stop_on_error": true,
+    "undo_on_error": true,
+    "stop_undo_on_error": true,
+    "steps": [
+        {
+            "id": "1",
+            "undo": false,
+            "schema": {
+                "mapping": {
+                    "orchestration": "create_scw_server",
+                    "hosts": {
+                        "from": "env.server_id"
+                    },
+                    "image":  "centos_7.6",
+                    "instance_type": "DEV1-S"
+
+                }
+            },
+            "system_kwargs": {},
+            "parent_step_ids": [],
+            "action_type": "ORCHESTRATION"
+        },
+        {
+            "id": "2",
+            "undo": false,
+            "schema": {
+                "mapping": {
+                    "orchestration": "install_lw_tibero",
+                    "hosts": {
+                        "from": "input.name"
+                    }
+                }
+            },
+            "system_kwargs": {},
+            "parent_step_ids": [
+                "1"
+            ],
+            "action_type": "ORCHESTRATION"
+        }
+    ]
+}

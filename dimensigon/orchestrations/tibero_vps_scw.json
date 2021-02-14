@@ -1,0 +1,76 @@
+{
+  "name": "tibero_vps_scw",
+  "stop_on_error": true,
+  "undo_on_error": true,
+  "stop_undo_on_error": true,
+  "steps": [
+    {
+      "id": "1",
+      "undo": false,
+      "schema": {
+        "mapping": {
+          "orchestration": "create_scw_server",
+          "hosts": {
+            "from": "env.server_id"
+          },
+          "image": "centos_7.6",
+          "instance_type": "DEV1-S"
+        }
+      },
+      "system_kwargs": {},
+      "parent_step_ids": [],
+      "action_type": "ORCHESTRATION"
+    },
+    {
+      "id": "2",
+      "undo": false,
+      "schema": {
+        "mapping": {
+          "orchestration": "install_lw_tibero",
+          "hosts": {
+            "from": "input.name"
+          }
+        }
+      },
+      "system_kwargs": {},
+      "parent_step_ids": [
+        "1"
+      ],
+      "action_type": "ORCHESTRATION"
+    },
+    {
+      "id": 3,
+      "undo": false,
+      "action_type": "SHELL",
+      "code": [
+        "PLUGIN_PATH={{vault.plugins}}/google_email",
+        "TEMPLATE_PATH={{vault.email_templates}}/tibero_saas_demo",
+        "python $PLUGIN_PATH/main.py --subject=\"Dimensigon Tibero Server\" --email-template=$TEMPLATE_PATH/template.html --image-directory=$TEMPLATE_PATH/images --param=name:\"{{input.client_email}}\" --param=db_user:sys --param=db_password:{{input.sys_password}} --param=db_server:{{input.scw_id}}.pub.instances.scw.cloud --param=db_port:8629 --param=db_name:tibero $PLUGIN_PATH/credentials/bot@knowtrade.eu_credentials.json $PLUGIN_PATH/credentials/bot@knowtrade.eu_token.pickle {{input.client_email}}"
+      ],
+      "expected_rc": 0,
+      "parent_step_ids": [
+        "2"
+      ],
+      "schema": {
+        "input": {
+          "client_email": {
+            "type": "string"
+          },
+          "sys_password": {
+            "type": "string"
+          },
+          "scw_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_email",
+          "sys_password",
+          "scw_id",
+          "vault.plugins",
+          "vault.email_templates"
+        ]
+      }
+    }
+  ]
+}

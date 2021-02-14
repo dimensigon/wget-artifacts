@@ -12,7 +12,11 @@ yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 ntp \
 	gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
 	compat-libstdc++ libaio libaio-devel ufw \
 	perl make tree bc wget curl #Extra
-#
+
+#yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
+#  libaio libaio-devel libnsl \
+#	perl make tree bc wget curl #Extra
+
 yum -q clean packages
 
 sed -i 's/\(SELINUX=\).*/\1disabled/' /etc/selinux/config 2>/dev/null
@@ -39,6 +43,8 @@ sed -i "/$1/d" /etc/sysctl.conf
 echo "$1 = $2" >> /etc/sysctl.conf
 
 }
+
+cp /etc/sysctl.conf /etc/sysctl.conf.before_tibero_install.bkp
 
 echo "#Tibero Specific" >> /etc/sysctl.conf
 
@@ -82,7 +88,7 @@ wget --progress=dot:mega --load-cookies /tmp/cookies.txt \
 -O /tmp/tibero6-bin-FS07_CS_1912-linux64-174424-opt.tar.gz && rm -rf /tmp/cookies.txt
 chmod 755 /tmp/tibero6-bin-FS07_CS_1912-linux64-174424-opt.tar.gz
 
-su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/bash_profile_tibero -O /home/tibero/.bash_profile"
+su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/tibero/bash_profile_tibero -O /home/tibero/.bash_profile"
 
 #Until 20200930
 wget -q --load-cookies /tmp/cookies.txt \
@@ -97,9 +103,9 @@ TB_HOME=/tibero/tibero6
 chown tibero:dba ~/license_dummy.xml
 cp -p ~/license_dummy.xml /tibero/tibero6/license/license.xml
 
-tctl check $TB_HOME
+/usr/local/bin/tctl check $TB_HOME
 
-su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/start_4g.bash -O /home/tibero/start_4g.bash"
+su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/tibero/start_4g.bash -O /home/tibero/start_4g.bash"
 
 su - tibero -c "chmod +x start_4g.bash && bash start_4g.bash"
 

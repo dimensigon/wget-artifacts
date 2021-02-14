@@ -1,0 +1,167 @@
+{#
+Copyright 2019 Exasol AG All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+
+{% set REGION = properties['zone'].split('-')[0] ~ '-' ~ properties['zone'].split('-')[1] %}
+
+
+resources:
+
+
+- name: {{ env["deployment"] }}-firewall-rule
+  type: compute.v1.firewall
+  properties:
+    network: /compute/v1/projects/{{env['project']}}/global/networks/{{properties['networkName']}}
+  
+    sourceRanges:
+      - {{ properties["firewallRule"] }}
+    allowed:
+    - IPProtocol: TCP
+      ports: ["22", "443", "8563", "8835"]
+    - IPProtocol: ICMP
+
+- name: {{ env["deployment"] }}-firewall-rule-internal
+  type: compute.v1.firewall
+  properties:
+    network: /compute/v1/projects/{{env['project']}}/global/networks/{{properties['networkName']}}
+  
+    sourceRanges:
+      - {{ properties['subnetworkCidr'] }}
+    allowed:
+    - IPProtocol: TCP
+    - IPProtocol: UDP
+    - IPProtocol: ICMP
+
+{% for vm_index in range(0, properties['dbNodeCount'] + properties['standbyNode'] + 1) %}
+
+{% if vm_index != 0 %}
+{% for disk_index in range(0, properties['blockDeviceCount'] + 1) %}
+- name: {{ env['deployment'] + '-datadisk-n00' + (10 + vm_index)|string + '-' + disk_index|string }}
+  type: compute.v1.disk
+  properties:
+    zone: {{ properties["zone"] }}
+    {% if disk_index == 0 %}
+    sizeGb: 100
+    {% endif %}
+    {% if disk_index != 0 %}
+    sizeGb: {{ properties["blockDeviceVolumeSizeGB"] }}
+    {% endif %}    
+    type: https://www.googleapis.com/compute/v1/projects/{{ env["project"] }}/zones/{{ properties["zone"] }}/diskTypes/pd-ssd
+{% endfor %}
+{% endif %}
+
+{% set VM_NAME_PREFIX = env['deployment'] + '-n00' + (10 + vm_index)|string %}
+- name: {{ VM_NAME_PREFIX }}
+  type: compute.v1.instance
+  properties:
+    zone: {{ properties['zone'] }}
+    {% if vm_index == 0 %}
+    machineType: https://www.googleapis.com/compute/v1/projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/machineTypes/{{ properties['machineTypeManagementNode'] }}
+    {% else %}
+    machineType: https://www.googleapis.com/compute/v1/projects/{{ env['project'] }}/zones/{{ properties['zone'] }}/machineTypes/{{ properties['machineTypeDatabaseNode'] }}
+    {% endif %}
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        diskName: {{ env['deployment'] + '-osdisk-n00' + (10 + vm_index)|string }}
+        sourceImage: {{ properties['image'] }}
+    {% if vm_index != 0 %}
+    {% for disk_index in range(0, properties['blockDeviceCount'] + 1) %}
+    - deviceName: {{ env['deployment'] + '-datadisk-n00' + (10 + vm_index)|string + '-' + disk_index|string }}
+      type: PERSISTENT
+      source: $(ref.{{ env['deployment'] + '-datadisk-n00' + (10 + vm_index)|string + '-' + disk_index|string }}.selfLink)
+      autoDelete: true
+    {% endfor %}
+    {% endif %}
+    networkInterfaces:
+    - subnetwork: /compute/v1/projects/{{env['project']}}/regions/{{ REGION }}/subnetworks/{{properties['subnetworkName']}}
+      networkIP: {{ properties['firstNodeIP'].split('.')[0] ~ '.' ~ properties['firstNodeIP'].split('.')[1] ~ '.' ~ properties['firstNodeIP'].split('.')[2] ~ '.' ~ (properties['firstNodeIP'].split('.')[3]|int + vm_index)|string }} 
+      {% if properties['publicIP'] %}
+      accessConfigs:
+      - name: external-nat
+        type: ONE_TO_ONE_NAT
+      {% endif %}
+    serviceAccounts:
+        - email: default
+          scopes:
+            - https://www.googleapis.com/auth/compute
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+            #!/bin/bash
+            mkdir -p /var/lib/exawolke/
+            LICENSE='{{ properties['license']|default('', true) }}'
+            if ! [[ -z ${LICENSE//} ]]; then mv /usr/opt/EXAWolke/etc/exasolution.lic /usr/opt/EXAWolke/etc/exasolution.lic_backup; echo $LICENSE > /usr/opt/EXAWolke/etc/exasolution.lic; fi
+            LICENSE_SERVER_IP='{{properties['firstNodeIP']}}'
+            FIRSTDATANODEIP='{{ properties['firstNodeIP'].split('.')[0] ~ '.' ~ properties['firstNodeIP'].split('.')[1] ~ '.' ~ properties['firstNodeIP'].split('.')[2] ~ '.' ~ (properties['firstNodeIP'].split('.')[3]|int + 1)|string }}'
+            DBNODECOUNT='{{properties['dbNodeCount']}}'
+            DB_STANDBY_NODES='{{properties['standbyNode']}}'
+            COS_NETWORK='{{properties['subnetworkCidr']}}'
+            ip2int()
+            {
+              local a b c d
+              { IFS=. read a b c d; } <<< $1
+              echo $(((((((a << 8) | b) << 8) | c) << 8) | d))
+            }
+            function get_node_list {
+            DATANODE_FIRST=$(($(ip2int ${FIRSTDATANODEIP}) -$(ip2int ${COS_NETWORK%/*})))
+            DATANODE_LAST=$((DATANODE_FIRST+DBNODECOUNT-1+DB_STANDBY_NODES))
+            LICENSE_SERVER_IP_OFFSET=$(($(ip2int ${LICENSE_SERVER_IP}) -$(ip2int ${COS_NETWORK%/*}) -10))
+            echo $(seq $DATANODE_FIRST $DATANODE_LAST | while read a; do printf 'n%04d  ' $((a-LICENSE_SERVER_IP_OFFSET)); done)
+            }
+            ln -sf /var/lib/exawolke/cluster.conf
+            cat <<-EOF > /var/lib/exawolke/cluster.conf
+            NODES='$(get_node_list)'
+            PASSWORD_DB='{{properties['dbPassword']}}'
+            PASSWORD='{{properties['exasolPassword']}}'   
+            ST_REPLICATION_FACTOR='{% if properties['dbNodeCount'] > 1 %}2{% else %}1{% endif %}'
+            DB_NAME='{{properties['dbSystemName']}}'
+            DB_STANDBY_NODES='{{properties['standbyNode']}}'
+            DATA_EBS_ENCRYPTED='false'
+            TIMEZONE='{{properties['timezone']}}'
+            DNS_SERVER_1='{{properties['dnsServer']}}'
+            NTP_SERVER_1='{{properties['ntpServer']}}'
+            DEFAULT_GATEWAY='{{ properties['subnetworkCidr'].split('.')[0] ~ '.' ~ properties['subnetworkCidr'].split('.')[1] ~ '.' ~ properties['subnetworkCidr'].split('.')[2] ~ '.' ~ (properties['subnetworkCidr'].split('.')[3].split('/')[0]|int + 1)|string }}'
+            DB_RESTORE_BACKUP_SOURCE='https://$(ref.{{ env['deployment'] + '-bucket' }}.name).storage.googleapis.com'
+            RESTORE_BACKUP_ACCESS_KEY='$(ref.{{ env['deployment'] + '-bucketkey' }}.metadata.accessId)'
+            RESTORE_BACKUP_SECRET_KEY='$(ref.{{ env['deployment'] + '-bucketkey' }}.secret)'
+            KERNEL_PARAMETERS=''
+            NETWORK_RANGE='{{properties['subnetworkCidr']}}'
+            COS_NETWORK='{{properties['subnetworkCidr']}}'
+            COS_NETWORK_OFFSET='0'
+            LICENSE_SERVER_IP=${LICENSE_SERVER_IP}
+            LICENSE_SERVER_IP_OFFSET=$(($(ip2int ${LICENSE_SERVER_IP}) -$(ip2int ${COS_NETWORK%/*}) -10))
+            TESTS=''
+            TAG=''
+            PLACEMENT_GROUP=''
+            INSTANCE_TYPE='{{ properties['machineTypeDatabaseNode'] }}'
+            EOF
+{% endfor %}
+
+- type: storage.v1.bucket
+  name: {{ env['deployment'] + '-bucket' }}
+  properties:
+    location: {{ REGION }}
+    kind: storage#bucket
+    storageClass: REGIONAL
+    versioning:
+      enabled: false
+
+- action: gcp-types/storage-v1:storage.projects.hmacKeys.create
+  name: {{ env['deployment'] + '-bucketkey' }}
+  properties:
+    serviceAccountEmail: {{env['project_number']}}-compute@developer.gserviceaccount.com
+    projectId: {{env['project']}}

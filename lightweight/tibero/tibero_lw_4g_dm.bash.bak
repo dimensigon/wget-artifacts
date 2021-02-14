@@ -11,12 +11,10 @@ yum -y update
 yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 ntp \
 	gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
 	compat-libstdc++ libaio libaio-devel ufw \
-	perl make tree bc wget curl #Extra
-
-#yum -q -y --nogpgcheck install java-1.8.0-openjdk-devel.x86_64 gcc gcc-c++ libgcc libstdc++ libstdc++-devel \
-#  libaio libaio-devel libnsl \
-#	perl make tree bc wget curl #Extra
-
+	perl make tree bc wget curl \
+        python3 python3-dev python3-venv python3-pip \
+	libffi-dev libssl-dev autoconf build-essential
+#
 yum -q clean packages
 
 sed -i 's/\(SELINUX=\).*/\1disabled/' /etc/selinux/config 2>/dev/null
@@ -43,8 +41,6 @@ sed -i "/$1/d" /etc/sysctl.conf
 echo "$1 = $2" >> /etc/sysctl.conf
 
 }
-
-cp /etc/sysctl.conf /etc/sysctl.conf.before_tibero_install.bkp
 
 echo "#Tibero Specific" >> /etc/sysctl.conf
 
@@ -88,14 +84,22 @@ wget --progress=dot:mega --load-cookies /tmp/cookies.txt \
 -O /tmp/tibero6-bin-FS07_CS_1912-linux64-174424-opt.tar.gz && rm -rf /tmp/cookies.txt
 chmod 755 /tmp/tibero6-bin-FS07_CS_1912-linux64-174424-opt.tar.gz
 
+echo "-- Starting extract bash profile from tar"
 su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/tibero/bash_profile_tibero -O /home/tibero/.bash_profile"
+echo "-- Finished extract bash profile from tar"
 
+echo "-- Starting extract license from tar"
 #Until 20200930
 wget -q --load-cookies /tmp/cookies.txt \
 "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1mRUj19dZmrqx6lW91QBZn1H7Jn4gglp4' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1mRUj19dZmrqx6lW91QBZn1H7Jn4gglp4" \
 -O ~/license_dummy.xml && rm -rf /tmp/cookies.txt
+echo "-- Ending extract license from tar"
+
+echo "-- Starting extract of Tibero from tar --"
 
 su - tibero -c "cd /tibero && tar -xf /tmp/tibero6-*.tar.gz"
+
+echo "-- Finished extract of Tibero from tar --"
 
 rm -f /tmp/tibero6-bin-*.tar.gz
 
@@ -103,9 +107,40 @@ TB_HOME=/tibero/tibero6
 chown tibero:dba ~/license_dummy.xml
 cp -p ~/license_dummy.xml /tibero/tibero6/license/license.xml
 
-/usr/local/bin/tctl check $TB_HOME
+tctl check $TB_HOME
 
-su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/start_8g.bash -O /home/tibero/start_8g.bash"
+su - tibero -c "wget -q https://raw.githubusercontent.com/dimensigon/wget-artifacts/master/lightweight/tibero/start_4g.bash -O /home/tibero/start_4g.bash"
 
-su - tibero -c "chmod +x start_8g.bash && bash start_8g.bash"
+su - tibero -c "chmod +x start_4g.bash && bash start_4g.bash"
+
+
+
+
+#Dimensigon
+function dn() { return 0; } #Do Nothing.
+function fdt() { date +%Y%m%d%H%M:%S:%N; }
+function output() { echo -e "`fdt`:\e[92m$@\e[0m"; }
+
+output "-- Updating & Installing necessary packages --"
+
+useradd -s /bin/bash -m dimensigon
+
+echo "
+dimensigon    ALL=(ALL)    NOPASSWD:ALL
+" >> /etc/sudoers
+
+output "-- Python - Creating a Virtual Environment --"
+
+su - dimensigon -c "python3 -m venv -- prompt dimensigon venv"
+
+output "-- Python - Autoload at login time --"
+
+su - dimensigon -c "echo 'source ~/venv/bin/activate' >> .bash_profile"
+
+output "-- PIP Install Dimensigon --"
+
+su - dimensigon -c "pip install wheel"
+su - dimensigon -c "pip install dimensigon"
+
+set +eu
 
