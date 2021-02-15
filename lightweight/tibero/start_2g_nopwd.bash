@@ -24,8 +24,8 @@ echo "$1=$2" >> $TB_CONFIG/tibero.tip
 output "--- Executing TB_CONFIG/gen_tip.sh ---"
 $TB_CONFIG/gen_tip.sh
 
-tibero_tip_set "TOTAL_SHM_SIZE" "450M"
-tibero_tip_set "MEMORY_TARGET" "600M"
+tibero_tip_set "TOTAL_SHM_SIZE" "850M"
+tibero_tip_set "MEMORY_TARGET" "900M"
 
 output "--- Creating the Database with TB_HOME/bin/tb_create_db.sh ---"
 $TB_HOME/bin/tb_create_db.sh
